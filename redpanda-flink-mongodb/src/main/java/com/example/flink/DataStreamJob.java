@@ -23,10 +23,10 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -37,7 +37,7 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 /**
@@ -85,11 +85,11 @@ public class DataStreamJob {
 		private transient MongoCollection<Document> collection;
 
 		@Override
-		public void open(Configuration parameters) throws Exception {
+		public void open(Configuration parameters) {
 			// Create the MongoDB client to establish connection
 			MongoClientSettings settings = MongoClientSettings.builder()
 					.applyToClusterSettings(builder ->
-							builder.hosts(Arrays.asList(new ServerAddress("mongo", 27017))))
+							builder.hosts(Collections.singletonList(new ServerAddress("mongo", 27017))))
 					.codecRegistry(createCodecRegistry())
 					.build();
 
@@ -97,12 +97,12 @@ public class DataStreamJob {
 
 			// Access the MongoDB database and collection
 			// At this stage, if the Mongo DB and collection does not exist, they would get auto-created
-			MongoDatabase database = mongoClient.getDatabase("fraud_detection");
-			collection = database.getCollection("fraud_transactions");
+			MongoDatabase database = mongoClient.getDatabase("finance");
+			collection = database.getCollection("financial_transactions");
 		}
 
 		@Override
-		public void invoke(String value, Context context) throws Exception {
+		public void invoke(String value, Context context) {
 			// Consume the event from redpanda topic
 			LOG.info("Consumed event : " + value);
 			Document transactionDocument = Document.parse(value);
@@ -115,7 +115,7 @@ public class DataStreamJob {
 		}
 
 		@Override
-		public void close() throws Exception {
+		public void close() {
 			// Clean up resources, if needed
 		}
 
