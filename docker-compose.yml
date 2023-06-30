@@ -43,6 +43,8 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-job-manager
+    volumes:
+      - ./flink-job:/opt/flink/jobs/
     command: jobmanager
 
   flink-taskmanager:
